@@ -1,0 +1,20 @@
+{
+  "name": "@job-ingestion/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/worker.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "ingest": "tsx src/worker.ts"
+  },
+  "dependencies": {
+    "@job-ingestion/database": "0.0.0",
+    "@job-ingestion/ingestion": "0.0.0",
+    "bullmq": "^6.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}
