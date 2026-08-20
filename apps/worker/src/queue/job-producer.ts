@@ -20,6 +20,8 @@ function toPersistJobPayload(job: CanonicalJob): PersistJobPayload {
 
 export async function enqueueJob(job: CanonicalJob) {
     const payload = toPersistJobPayload(job)
-    
-    return  job_ingestion_queue.add("persist_job",payload)
+
+    const queuedJob = await job_ingestion_queue.add("persist_job", payload);
+    console.log(`Queued job: ${queuedJob.id}`);
+    return queuedJob;
 }

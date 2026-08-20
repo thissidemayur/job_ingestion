@@ -1,25 +1,25 @@
 import {ingestArbeitnowJobs} from "@job-ingestion/ingestion"
-import {upsertJob} from "@job-ingestion/database"
+import { enqueueJob } from "./queue/job-producer.js";
 
 async function run() {
-    console.log("Starting Arbitnow ingestion...")
+    try {
+        console.log("Starting Arbitnow ingestion...");
 
-    const jobs = await ingestArbeitnowJobs()
-    console.log(`Fetched and normalized: ${jobs.length} jobs`)
+        const jobs = await ingestArbeitnowJobs();
 
-    let created=0;
-    let updated=0;
+        console.log(`Fetched and normalized: ${jobs.length} jobs`);
 
-    for (const job of jobs) {
-        await upsertJob(job)
 
+        for (const job of jobs) {
+          await enqueueJob(job);
+        }
+
+        console.log(`Enqueued: ${jobs.length} jobs`);
+    } catch (error) {
+        console.error("Ingestion failed:");
+        console.error(error);
+        process.exitCode = 1;
     }
-    console.log(`Persisted: ${jobs.length} jobs`)
 }
 
-run().catch((error)=>{
-console.error("Ingestion failed:");
-console.error(error);    
-  process.exitCode = 1;
-
-})
+run()
