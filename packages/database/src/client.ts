@@ -28,4 +28,11 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-export { prisma };
+// disconnect db
+async function disconnectDatabase() {
+  await prisma.$disconnect();
+}
+
+export { prisma , disconnectDatabase};
+
+
