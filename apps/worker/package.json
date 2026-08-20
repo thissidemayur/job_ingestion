@@ -7,12 +7,16 @@
     "dev": "tsx watch src/worker.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "ingest": "tsx src/worker.ts"
+    "ingest": "tsx src/worker.ts",
+    "consume": "tsx src/queue/job-consumer.ts"
   },
   "dependencies": {
     "@job-ingestion/database": "0.0.0",
     "@job-ingestion/ingestion": "0.0.0",
-    "bullmq": "^6.1.2"
+    "bullmq": "^6.1.2",
+    "dotenv": "^17.4.2",
+    "ioredis": "^6.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.2.0"
