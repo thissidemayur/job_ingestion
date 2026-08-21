@@ -1,25 +1,35 @@
-import {ingestArbeitnowJobs} from "@job-ingestion/ingestion"
+import { ingestArbeitnowJobs } from "@job-ingestion/ingestion";
 import { enqueueJob } from "./queue/job-producer.js";
+import { jobConsumer } from "./queue/job-consumer.js";
+import { logger } from "./config/logger.js";
 
 async function run() {
-    try {
-        console.log("Starting Arbitnow ingestion...");
+  try {
+    logger.info("Starting Arbitnow ingestion...");
 
-        const jobs = await ingestArbeitnowJobs();
+    const jobs = await ingestArbeitnowJobs();
 
-        console.log(`Fetched and normalized: ${jobs.length} jobs`);
+    logger.info(
+      {
+        jobCout: jobs.length,
+      },
+      "job fetched and normalized",
+    );
 
-
-        for (const job of jobs) {
-          await enqueueJob(job);
-        }
-
-        console.log(`Enqueued: ${jobs.length} jobs`);
-    } catch (error) {
-        console.error("Ingestion failed:");
-        console.error(error);
-        process.exitCode = 1;
+    for (const job of jobs) {
+      await enqueueJob(job);
     }
+
+    logger.info(
+      {
+        jobCout: jobs.length,
+      },
+      "job enqued",
+    );
+  } catch (error) {
+    logger.error({ err: error }, "Ingestion failed:");
+    process.exitCode = 1;
+  }
 }
 
-run()
+run();

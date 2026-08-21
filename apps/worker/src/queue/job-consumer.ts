@@ -2,13 +2,19 @@ import { Worker } from "bullmq";
 import type { PersistJobPayload } from "@job-ingestion/shared";
 import { disconnectDatabase, upsertJob } from "@job-ingestion/database";
 import { env } from "../config/env.js";
+import { logger } from "../config/logger.js";
 
 const redis = new URL(env.REDIS_URL);
-
+const consumerLogger = logger.child({
+  opereation:"persistent_job"
+})
 export const jobConsumer = new Worker<PersistJobPayload>(
   "job-ingestion",
   async (job) => {
-    console.log(`Processing job: ${job.id}`);
+    consumerLogger.info(
+      { jobId: job.id, attempts: job.attemptsMade + 1 },
+      "Processing job",
+    );
 
     const payload = job.data;
 
@@ -29,7 +35,12 @@ export const jobConsumer = new Worker<PersistJobPayload>(
       fetchedAt: new Date(payload.fetchedAt),
     });
 
-    console.log(`Completed job: ${job.id}`);
+   consumerLogger.info(
+     {
+       jobId: job.id,
+     },
+     "Job Completed",
+   );
   },
   {
     connection: {
@@ -40,13 +51,21 @@ export const jobConsumer = new Worker<PersistJobPayload>(
 );
 
 jobConsumer.on("failed", (job, error) => {
-  console.error(`Job ${job?.id ?? "unknown"} failed:`, error);
+  consumerLogger.error(
+    {
+      jobId: job?.id,
+      err: error,
+    },
+    "Job failed",
+  );
 });
 
 jobConsumer.on("completed", (job) => {
-  console.log(`Job ${job.id} completed`);
+  consumerLogger.info({jobId:job.id},"job completed")
 });
 
+
+// shutdown
 let shuttingDown = false;
 async function shutdown(signal: string) {
   if (shuttingDown) return;
