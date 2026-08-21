@@ -1,7 +1,7 @@
 import { ingestArbeitnowJobs } from "@job-ingestion/ingestion";
 import { enqueueJob } from "./queue/job-producer.js";
-import { jobConsumer } from "./queue/job-consumer.js";
 import { logger } from "./config/logger.js";
+import { jobsFetchedTotal } from "./config/metrics.js";
 
 async function run() {
   try {
@@ -15,6 +15,8 @@ async function run() {
       },
       "job fetched and normalized",
     );
+
+    jobsFetchedTotal.inc(jobs.length);
 
     for (const job of jobs) {
       await enqueueJob(job);
